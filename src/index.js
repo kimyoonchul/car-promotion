@@ -97,21 +97,50 @@ const asBullets = (arr) => (arr?.length ? arr.map((x) => `• ${x}`).join('\n') 
 const badgeOf = (post) =>
   post.rating === '강추' ? '⭐⭐ 강추' : post.rating === '추천' ? '⭐ 추천' : '';
 
-function summaryRow(post) {
+// "2026.06.15 ~ 2026.07.26" → "6/15~7/26 · D-14" 처럼 훑기 좋게 압축
+function compactPeriod(post) {
+  const dates = [...(post.extract?.period ?? '').matchAll(/\d{4}\.\s?(\d{1,2})\.\s?(\d{1,2})/g)];
+  if (dates.length === 0) return post.dday || '미상';
+  const fmt = (m) => `${Number(m[1])}/${Number(m[2])}`;
+  const range = dates.length >= 2 ? `${fmt(dates[0])}~${fmt(dates[dates.length - 1])}` : `${fmt(dates[0])}~`;
+  return post.dday ? `${range} · ${post.dday}` : range;
+}
+
+// 추천 평가가 핵심 혜택을 못 뽑았을 때(비전 실패 등)의 대체 요약
+function fallbackHighlights(post) {
   const ex = post.extract;
-  const isService = ex ? ex.isServiceCampaign : post.service;
-  const badge = badgeOf(post);
+  if (!ex) return [];
+  return [...(ex.discounts ?? []).slice(0, 2), ...(ex.freebies ?? []).slice(0, 1)].map((x) =>
+    x.length > 26 ? `${x.slice(0, 25)}…` : x,
+  );
+}
+
+// 요약 탭 — 핵심만
+function summaryRow(post) {
+  const isService = post.extract ? post.extract.isServiceCampaign : post.service;
+  const highlights = post.highlights?.length ? post.highlights : fallbackHighlights(post);
   return [
-    badge ? `${badge}${post.reason ? `\n${post.reason}` : ''}` : '',
+    badgeOf(post),
     post.dealer,
     post.regions,
-    isService ? '정비' : '기타',
+    isService ? post.title : `${post.title} (판매·기타)`,
+    compactPeriod(post),
+    asBullets(highlights),
+    `=HYPERLINK("${post.url}","보기")`,
+  ];
+}
+
+// 상세 탭 — 전체 혜택 목록
+function detailRow(post) {
+  const ex = post.extract;
+  return [
+    post.dealer,
     post.title,
     ex?.period ?? '미상',
-    post.dday || '',
     asBullets(ex?.discounts),
     asBullets(ex?.freebies),
-    `=HYPERLINK("${post.url}","바로가기")`,
+    post.reason ? `${badgeOf(post)} ${post.reason}` : '',
+    `=HYPERLINK("${post.url}","보기")`,
   ];
 }
 
@@ -204,6 +233,7 @@ async function main() {
       if (p) {
         p.rating = r.rating;
         p.reason = r.reason;
+        p.highlights = r.highlights;
       }
     }
     const rank = { 강추: 0, 추천: 1, 보통: 2 };
@@ -220,10 +250,10 @@ async function main() {
     return;
   }
 
-  // 4) 구글 시트 반영 — "지금 진행중"은 통째로 덮어쓰고, "전체 로그"엔 신규 건만 추가
+  // 4) 구글 시트 반영 — "지금 진행중"(요약)·"상세 혜택"은 통째로 덮어쓰고, "전체 로그"엔 신규 건만 추가
   try {
-    const wrote = await writeSummary(summaryPosts.map(summaryRow));
-    if (wrote) console.log(`"지금 진행중" 탭 갱신 (${summaryPosts.length}개 딜러)`);
+    const wrote = await writeSummary(summaryPosts.map(summaryRow), summaryPosts.map(detailRow));
+    if (wrote) console.log(`"지금 진행중"·"상세 혜택" 탭 갱신 (${summaryPosts.length}개 딜러)`);
   } catch (err) {
     console.error(`요약 탭 기록 실패: ${err.message}`);
   }

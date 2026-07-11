@@ -21,9 +21,14 @@ function postEmbed(post, { isNew = false } = {}) {
   desc.push(`📍 ${post.regions}`);
   if (!ex) desc.push('상세 내용은 링크에서 확인하세요.');
 
+  // 핵심 혜택(초압축)이 있으면 그것만 — 전체 목록은 시트 "상세 혜택" 탭에서 본다
   const fields = [];
-  if (ex?.discounts?.length) fields.push({ name: '💸 할인', value: bullets(ex.discounts, 6) });
-  if (ex?.freebies?.length) fields.push({ name: '🎁 무료·사은품', value: bullets(ex.freebies, 6) });
+  if (post.highlights?.length) {
+    fields.push({ name: '✨ 핵심 혜택', value: bullets(post.highlights, 4) });
+  } else {
+    if (ex?.discounts?.length) fields.push({ name: '💸 할인', value: bullets(ex.discounts, 4) });
+    if (ex?.freebies?.length) fields.push({ name: '🎁 무료·사은품', value: bullets(ex.freebies, 3) });
+  }
 
   return {
     title: `${badge}${icon} ${post.dealer} — ${post.title}`.slice(0, 256),

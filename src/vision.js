@@ -149,8 +149,13 @@ const RATING_SCHEMA = {
           dealer: { type: 'string', description: '입력에 있는 딜러사 이름 그대로' },
           rating: { type: 'string', enum: ['강추', '추천', '보통'] },
           reason: { type: 'string', description: '핵심 근거 한 줄 (30자 이내)' },
+          highlights: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '가장 실속 있는 혜택 2~4개, 각각 18자 이내 초압축 표기 (예: "소모품 최대 30%", "타이어 공임 50%", "20만원↑ 레디백", "앱예약 입고 시 우산")',
+          },
         },
-        required: ['dealer', 'rating', 'reason'],
+        required: ['dealer', 'rating', 'reason', 'highlights'],
         additionalProperties: false,
       },
     },
@@ -190,7 +195,8 @@ export async function rateCampaigns(posts) {
             `BMW 차주가 정비받을 딜러 서비스센터를 고르고 있다. 아래는 딜러별 현재 캠페인이다.\n\n${JSON.stringify(input, null, 1)}\n\n` +
             `딜러마다 추천 등급을 매겨라. 기준: (1) 무료 혜택이 많고 받기 쉬운가 — 무상점검, 문턱 낮은 사은품(적은 결제금액·간단한 조건)일수록 좋음 ` +
             `(2) 소모품·타이어·에어컨·공임 등 실제 정비비를 줄여주는 할인폭 (3) 정비 캠페인이 아닌 판매·금융 프로모션은 '보통'. ` +
-            `'강추'는 가장 실속 있는 1~2곳에만 부여하라.`,
+            `'강추'는 가장 실속 있는 1~2곳에만 부여하라. ` +
+            `highlights에는 그 딜러에서 가장 실속 있는 혜택만 2~4개 골라 초압축(각 18자 이내)으로 적어라 — 한눈에 훑는 요약표에 들어간다.`,
         },
       ],
     });

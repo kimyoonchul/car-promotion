@@ -1,10 +1,16 @@
 import { google } from 'googleapis';
 
 const SUMMARY_TAB = '지금 진행중';
+const DETAIL_TAB = '상세 혜택';
 const LOG_TAB = '전체 로그';
 
-export const SUMMARY_HEADER = ['추천', '딜러사', '지역', '구분', '캠페인명', '기간', '마감', '할인 혜택', '무료·사은품', '링크'];
-const SUMMARY_WIDTHS = [150, 100, 130, 55, 210, 165, 75, 300, 270, 90];
+// 요약 탭 — 한눈에 훑는 용도. 핵심 혜택 2~4개만 초압축으로 담는다.
+export const SUMMARY_HEADER = ['추천', '딜러사', '지역', '캠페인', '기간 · 마감', '핵심 혜택', '링크'];
+const SUMMARY_WIDTHS = [80, 100, 130, 190, 150, 300, 80];
+
+// 상세 탭 — 현재 캠페인의 전체 혜택 목록 (자세히 볼 때만)
+export const DETAIL_HEADER = ['딜러사', '캠페인명', '기간', '할인 혜택 (전체)', '무료·사은품 (전체)', '추천 이유', '링크'];
+const DETAIL_WIDTHS = [100, 210, 165, 320, 300, 190, 80];
 
 export const LOG_HEADER = ['수집일', '딜러사', '분류', '캠페인명', '게시일', '기간', '할인', '무료·사은품', '정비', '링크'];
 const LOG_WIDTHS = [140, 100, 120, 220, 90, 165, 280, 240, 45, 90];
@@ -25,12 +31,12 @@ function getClient() {
   return clientPromise;
 }
 
-// 탭이 없으면 만들고, 두 탭의 sheetId(숫자)를 반환한다.
+// 탭이 없으면 만들고, 탭별 sheetId(숫자)를 반환한다.
 async function ensureTabs(sheets, spreadsheetId) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
   const byTitle = new Map(meta.data.sheets.map((s) => [s.properties.title, s.properties.sheetId]));
 
-  const toAdd = [SUMMARY_TAB, LOG_TAB].filter((t) => !byTitle.has(t));
+  const toAdd = [SUMMARY_TAB, DETAIL_TAB, LOG_TAB].filter((t) => !byTitle.has(t));
   if (toAdd.length) {
     const res = await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
@@ -41,7 +47,22 @@ async function ensureTabs(sheets, spreadsheetId) {
       byTitle.set(p.title, p.sheetId);
     }
   }
-  return { summaryId: byTitle.get(SUMMARY_TAB), logId: byTitle.get(LOG_TAB) };
+  return { summaryId: byTitle.get(SUMMARY_TAB), detailId: byTitle.get(DETAIL_TAB), logId: byTitle.get(LOG_TAB) };
+}
+
+// 탭 하나를 통째로 덮어쓰고 서식을 다시 적용한다 (요약·상세 탭 공용)
+async function overwriteTab({ sheets, spreadsheetId, tab, sheetId, header, widths, rows }) {
+  await sheets.spreadsheets.values.clear({ spreadsheetId, range: `${tab}!A:Z` });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${tab}!A1`,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [header, ...rows] },
+  });
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: formatRequests(sheetId, widths) },
+  });
 }
 
 // 헤더 강조·틀고정·열너비·줄바꿈 — 매 실행 반복해도 안전한(idempotent) 요청들
@@ -83,24 +104,15 @@ function formatRequests(sheetId, widths) {
   ];
 }
 
-// "지금 진행중" 탭 — 딜러당 1행, 매 실행마다 통째로 덮어쓴다.
-export async function writeSummary(rows) {
+// "지금 진행중"(요약) + "상세 혜택" 탭 — 딜러당 1행, 매 실행마다 통째로 덮어쓴다.
+export async function writeSummary(summaryRows, detailRows) {
   const client = getClient();
   if (!client) return false;
   const { sheets, spreadsheetId } = await client;
-  const { summaryId } = await ensureTabs(sheets, spreadsheetId);
+  const { summaryId, detailId } = await ensureTabs(sheets, spreadsheetId);
 
-  await sheets.spreadsheets.values.clear({ spreadsheetId, range: `${SUMMARY_TAB}!A:Z` });
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${SUMMARY_TAB}!A1`,
-    valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [SUMMARY_HEADER, ...rows] },
-  });
-  await sheets.spreadsheets.batchUpdate({
-    spreadsheetId,
-    requestBody: { requests: formatRequests(summaryId, SUMMARY_WIDTHS) },
-  });
+  await overwriteTab({ sheets, spreadsheetId, tab: SUMMARY_TAB, sheetId: summaryId, header: SUMMARY_HEADER, widths: SUMMARY_WIDTHS, rows: summaryRows });
+  await overwriteTab({ sheets, spreadsheetId, tab: DETAIL_TAB, sheetId: detailId, header: DETAIL_HEADER, widths: DETAIL_WIDTHS, rows: detailRows });
   return true;
 }
 
