@@ -2,7 +2,7 @@ import { DEALERS } from './dealers.js';
 import { fetchHtml, parseArchive, parseDetail, parsePromotionLinks, parseSitemap } from './scrape.js';
 import { loadState, saveState } from './state.js';
 import { extractFromImages } from './vision.js';
-import { appendRows, SHEET_HEADER } from './sheets.js';
+import { writeSummary, appendLog } from './sheets.js';
 import { notifyDiscord } from './discord.js';
 import { fileURLToPath } from 'node:url';
 
@@ -17,6 +17,18 @@ const NO_VISION = process.argv.includes('--no-vision');
 
 const nowKST = () => new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' });
 const slug = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60);
+const NOISE_RE = /개인정보|처리방침|결산\s*공고|채용|약관/;
+const FRESH_DAYS = 180;
+
+const parseDate = (publishedOn) => {
+  const m = publishedOn?.match(/^(\d{4})\.(\d{2})\.(\d{2})/);
+  return m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}`) : -Infinity;
+};
+const isStale = (publishedOn) => {
+  const t = parseDate(publishedOn);
+  return t !== -Infinity && Date.now() - t > FRESH_DAYS * 86_400_000;
+};
+const keyOf = (p) => `${p.dealer}|${p.title}|${p.publishedOn ?? ''}`;
 
 // 소스 1곳에서 캠페인 후보 목록을 수집한다.
 // 반환: { id, url, title?, publishedOn?, images?, needsDetail }
@@ -31,7 +43,7 @@ async function collectSource(dealer, source, year) {
       if (!d.title) return [];
       // 허브 URL은 고정이고 내용이 갈리므로 상세링크(있으면) 또는 제목+게시일로 신규 여부를 판별
       const id = d.detailLink ?? `${url}#${slug(d.title)}@${d.publishedOn ?? ''}`;
-      return [{ id, url: d.detailLink ?? url, title: d.title, publishedOn: d.publishedOn, images: d.images, needsDetail: false }];
+      return [{ id, url: d.detailLink ?? url, title: d.title, publishedOn: d.publishedOn, images: d.images, needsDetail: false, resolved: true }];
     }
     case 'menu':
       return parsePromotionLinks(html, url).map((l) => ({ id: l.url, url: l.url, title: l.label, needsDetail: true }));
@@ -40,6 +52,44 @@ async function collectSource(dealer, source, year) {
     default:
       return [];
   }
+}
+
+// 상세(제목/게시일/이미지)가 아직 없으면 상세 페이지를 가져와 채운다. 이미 처리된 post는 재요청하지 않는다.
+async function resolveDetail(post) {
+  if (post.resolved) return post;
+  if (post.needsDetail) {
+    const d = parseDetail(await fetchHtml(post.url, { validate: post.validate }), post.url);
+    post.title = d.title ?? post.title ?? '(제목 없음)';
+    post.publishedOn = d.publishedOn ?? post.publishedOn;
+    post.images = d.images;
+  }
+  post.resolved = true;
+  return post;
+}
+
+// 배너 이미지에서 기간·혜택을 뽑는다. 성공한 결과만 캐싱한다 —
+// 실패(키 미설정 등)를 캐싱하면 나중에 키를 넣어도 예전 캠페인은 영영 재시도되지 않기 때문.
+async function resolveExtract(post, state) {
+  if (NO_VISION) return null;
+  const cached = state.extracts[post.id];
+  if (cached) return cached;
+  const extract = await extractFromImages({ dealer: post.dealer, title: post.title, images: post.images ?? [] });
+  if (extract) state.extracts[post.id] = extract;
+  return extract;
+}
+
+function summaryRow(post) {
+  const benefit = post.extract?.summary || (post.extract?.benefits ?? []).slice(0, 2).join(' / ') || '-';
+  return [
+    post.dealer,
+    post.regions,
+    post.title,
+    post.extract?.period ?? '미상',
+    benefit,
+    post.extract ? (post.extract.isServiceCampaign ? 'Y' : 'N') : '-',
+    post.publishedOn ?? '',
+    post.url,
+  ];
 }
 
 async function main() {
@@ -51,13 +101,18 @@ async function main() {
 
   // 1) 딜러별 소스에서 후보 수집
   const candidates = new Map(); // id → candidate
+  const byDealer = new Map(); // dealer.name → candidate[]
   for (const dealer of DEALERS) {
+    const list = [];
+    byDealer.set(dealer.name, list);
     for (const source of dealer.sources) {
       try {
         const posts = await collectSource(dealer, source, year);
         for (const p of posts) {
           if (!candidates.has(p.id)) {
-            candidates.set(p.id, { ...p, dealer: dealer.name, regions: dealer.regions, category: source.category, validate: dealer.validate });
+            const full = { ...p, dealer: dealer.name, regions: dealer.regions, category: source.category, service: !!source.service, validate: dealer.validate };
+            candidates.set(p.id, full);
+            list.push(full);
           }
         }
         console.log(`  ${dealer.name} / ${source.category}: ${posts.length}건`);
@@ -67,23 +122,11 @@ async function main() {
     }
   }
 
-  // 2) 신규 게시물만 추림
+  // 2) 신규 게시물만 추림 — "전체 로그" + 디스코드 알림 대상
   const fresh = [...candidates.values()].filter((c) => !state.seen[c.id]);
   console.log(`후보 ${candidates.size}건 중 신규 ${fresh.length}건`);
 
-  // 3) 신규 건 상세 조회(제목/게시일/이미지) + 이미지에서 기간·혜택 추출
-  // 같은 캠페인이 허브·아카이브 양쪽에 다른 URL로 잡히므로 딜러+제목+게시일로 중복 제거.
-  // 공지·약관류와 오래된 게시물(사이트맵 백필)은 상태에만 기록하고 처리하지 않는다.
-  const NOISE_RE = /개인정보|처리방침|결산\s*공고|채용|약관/;
-  const FRESH_DAYS = 180;
-  const isStale = (publishedOn) => {
-    const m = publishedOn?.match(/^(\d{4})\.(\d{2})\.(\d{2})/);
-    if (!m) return false;
-    return Date.now() - Date.parse(`${m[1]}-${m[2]}-${m[3]}`) > FRESH_DAYS * 86_400_000;
-  };
-  const keyOf = (p) => `${p.dealer}|${p.title}|${p.publishedOn ?? ''}`;
-
-  const results = [];
+  const results = []; // 로그에 쌓을 신규 건
   const skipped = []; // 중복·노이즈·오래된 건 — 상태에만 기록
   const contentKeys = new Set();
   for (const post of fresh) {
@@ -92,12 +135,7 @@ async function main() {
         skipped.push(post);
         continue;
       }
-      if (post.needsDetail) {
-        const d = parseDetail(await fetchHtml(post.url, { validate: post.validate }), post.url);
-        post.title = d.title ?? post.title ?? '(제목 없음)';
-        post.publishedOn = d.publishedOn ?? post.publishedOn;
-        post.images = d.images;
-      }
+      await resolveDetail(post);
       const key = keyOf(post);
       if (contentKeys.has(key) || NOISE_RE.test(post.title) || isStale(post.publishedOn)) {
         contentKeys.add(key);
@@ -105,9 +143,7 @@ async function main() {
         continue;
       }
       contentKeys.add(key);
-      if (!NO_VISION) {
-        post.extract = await extractFromImages({ dealer: post.dealer, title: post.title, images: post.images ?? [] });
-      }
+      post.extract = await resolveExtract(post, state);
       results.push(post);
       const p = post.extract?.period ? ` | 기간 ${post.extract.period}` : '';
       console.log(`  [신규] ${post.dealer} — ${post.title} (게시 ${post.publishedOn ?? '?'})${p}`);
@@ -117,28 +153,55 @@ async function main() {
   }
   if (skipped.length) console.log(`중복/공지/오래된 게시물 ${skipped.length}건은 기록만 하고 건너뜀`);
 
+  // 3) "지금 진행중" 요약 — 딜러별로 정비(A/S) 캠페인 소스 중 가장 최근 것을 우선 선정.
+  // 정비 캠페인 소스가 하나도 없으면(코오롱 등) 전체 중 최근 게시물로 대체한다.
+  const summaryPosts = [];
+  for (const dealer of DEALERS) {
+    const all = (byDealer.get(dealer.name) ?? []).filter((p) => !NOISE_RE.test(p.title ?? ''));
+    if (all.length === 0) continue;
+    const serviceOnly = all.filter((p) => p.service);
+    const list = serviceOnly.length ? serviceOnly : all;
+    list.sort((a, b) => parseDate(b.publishedOn) - parseDate(a.publishedOn));
+    const top = list[0];
+    try {
+      await resolveDetail(top);
+      top.extract ??= await resolveExtract(top, state);
+      summaryPosts.push(top);
+    } catch (err) {
+      console.error(`  [요약] ${dealer.name} 최신 캠페인 조회 실패: ${err.message}`);
+    }
+  }
+
   if (DRY_RUN) {
     console.log('dry-run: 시트/디스코드/상태 저장을 생략합니다.');
+    console.log('--- 지금 진행중 요약 미리보기 ---');
+    for (const p of summaryPosts) console.log(`  ${p.dealer}: ${p.title} (게시 ${p.publishedOn ?? '?'})`);
     return;
   }
 
-  // 4) 구글 시트에 축적 (초기 실행이면 헤더부터)
-  const rows = results.map((p) => [
-    nowKST(),
-    p.dealer,
-    p.category,
-    p.title,
-    p.publishedOn ?? '',
-    p.extract?.period ?? '',
-    (p.extract?.benefits ?? []).join(' / '),
-    p.extract ? (p.extract.isServiceCampaign ? 'Y' : 'N') : '',
-    p.url,
-  ]);
+  // 4) 구글 시트 반영 — "지금 진행중"은 통째로 덮어쓰고, "전체 로그"엔 신규 건만 추가
   try {
-    const wrote = await appendRows(isInitialRun && rows.length ? [SHEET_HEADER, ...rows] : rows);
-    if (wrote) console.log(`구글 시트에 ${rows.length}행 추가`);
+    const wrote = await writeSummary(summaryPosts.map(summaryRow));
+    if (wrote) console.log(`"지금 진행중" 탭 갱신 (${summaryPosts.length}개 딜러)`);
   } catch (err) {
-    console.error(`구글 시트 기록 실패: ${err.message}`);
+    console.error(`요약 탭 기록 실패: ${err.message}`);
+  }
+  try {
+    const logRows = results.map((p) => [
+      nowKST(),
+      p.dealer,
+      p.category,
+      p.title,
+      p.publishedOn ?? '',
+      p.extract?.period ?? '',
+      (p.extract?.benefits ?? []).join(' / '),
+      p.extract ? (p.extract.isServiceCampaign ? 'Y' : 'N') : '',
+      p.url,
+    ]);
+    const wrote = await appendLog(logRows);
+    if (wrote) console.log(`"전체 로그" 탭에 ${logRows.length}행 추가`);
+  } catch (err) {
+    console.error(`로그 기록 실패: ${err.message}`);
   }
 
   // 5) 디스코드 알림 (초기 백필은 생략)

@@ -6,9 +6,11 @@ const STATE_PATH = fileURLToPath(new URL('../data/state.json', import.meta.url))
 
 export function loadState() {
   try {
-    return JSON.parse(readFileSync(STATE_PATH, 'utf8'));
+    const state = JSON.parse(readFileSync(STATE_PATH, 'utf8'));
+    state.extracts ??= {};
+    return state;
   } catch {
-    return { seen: {} };
+    return { seen: {}, extracts: {} };
   }
 }
 

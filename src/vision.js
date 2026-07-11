@@ -50,7 +50,9 @@ export async function extractFromImages({ dealer, title, images }) {
     const text = response.content.find((b) => b.type === 'text')?.text;
     return text ? JSON.parse(text) : null;
   } catch (err) {
-    if (err instanceof Anthropic.AuthenticationError) {
+    // SDK가 API 키 자체를 못 찾으면 HTTP 요청 전에 던지는 클라이언트측 에러라
+    // Anthropic.AuthenticationError(서버 응답 401)의 서브클래스가 아니다 — 메시지로 함께 판별한다.
+    if (err instanceof Anthropic.AuthenticationError || /authentication method/i.test(err.message)) {
       disabled = true;
       console.warn('  [vision] API 자격증명 없음 — 이번 실행에서 이미지 추출 비활성화');
     } else {
