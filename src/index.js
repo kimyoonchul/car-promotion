@@ -3,7 +3,7 @@ import { fetchHtml, parseArchive, parseDetail, parsePromotionLinks, parseSitemap
 import { loadState, saveState } from './state.js';
 import { extractFromImages } from './vision.js';
 import { writeSummary, appendLog } from './sheets.js';
-import { notifyDiscord } from './discord.js';
+import { notifyDiscord, sendDigest } from './discord.js';
 import { fileURLToPath } from 'node:url';
 
 try {
@@ -14,6 +14,7 @@ try {
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const NO_VISION = process.argv.includes('--no-vision');
+const DIGEST = process.argv.includes('--digest');
 
 const nowKST = () => new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' });
 const slug = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60);
@@ -69,26 +70,43 @@ async function resolveDetail(post) {
 
 // 배너 이미지에서 기간·혜택을 뽑는다. 성공한 결과만 캐싱한다 —
 // 실패(키 미설정 등)를 캐싱하면 나중에 키를 넣어도 예전 캠페인은 영영 재시도되지 않기 때문.
+// 구버전 스키마(discounts/freebies 없음)로 캐싱된 항목은 무효로 보고 다시 추출한다.
 async function resolveExtract(post, state) {
   if (NO_VISION) return null;
   const cached = state.extracts[post.id];
-  if (cached) return cached;
+  if (cached && Array.isArray(cached.discounts) && Array.isArray(cached.freebies)) return cached;
   const extract = await extractFromImages({ dealer: post.dealer, title: post.title, images: post.images ?? [] });
   if (extract) state.extracts[post.id] = extract;
   return extract;
 }
 
+// "2026.06.15 ~ 2026.07.26" 같은 기간 문자열의 마지막 날짜를 종료일로 보고 D-day를 계산
+function dday(period) {
+  const dates = [...(period ?? '').matchAll(/(\d{4})\.\s?(\d{1,2})\.\s?(\d{1,2})/g)];
+  if (dates.length === 0) return '';
+  const [, y, m, d] = dates[dates.length - 1];
+  const end = Date.parse(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T23:59:59+09:00`);
+  const days = Math.floor((end - Date.now()) / 86_400_000);
+  if (days < 0) return '종료됨';
+  if (days === 0) return '오늘 마감';
+  return `D-${days}`;
+}
+
+const asBullets = (arr) => (arr?.length ? arr.map((x) => `• ${x}`).join('\n') : '-');
+
 function summaryRow(post) {
-  const benefit = post.extract?.summary || (post.extract?.benefits ?? []).slice(0, 2).join(' / ') || '-';
+  const ex = post.extract;
+  const isService = ex ? ex.isServiceCampaign : post.service;
   return [
     post.dealer,
     post.regions,
+    isService ? '정비' : '기타',
     post.title,
-    post.extract?.period ?? '미상',
-    benefit,
-    post.extract ? (post.extract.isServiceCampaign ? 'Y' : 'N') : '-',
-    post.publishedOn ?? '',
-    post.url,
+    ex?.period ?? '미상',
+    post.dday || '',
+    asBullets(ex?.discounts),
+    asBullets(ex?.freebies),
+    `=HYPERLINK("${post.url}","바로가기")`,
   ];
 }
 
@@ -166,6 +184,7 @@ async function main() {
     try {
       await resolveDetail(top);
       top.extract ??= await resolveExtract(top, state);
+      top.dday = dday(top.extract?.period);
       summaryPosts.push(top);
     } catch (err) {
       console.error(`  [요약] ${dealer.name} 최신 캠페인 조회 실패: ${err.message}`);
@@ -194,9 +213,10 @@ async function main() {
       p.title,
       p.publishedOn ?? '',
       p.extract?.period ?? '',
-      (p.extract?.benefits ?? []).join(' / '),
+      asBullets(p.extract?.discounts),
+      asBullets(p.extract?.freebies),
       p.extract ? (p.extract.isServiceCampaign ? 'Y' : 'N') : '',
-      p.url,
+      `=HYPERLINK("${p.url}","바로가기")`,
     ]);
     const wrote = await appendLog(logRows);
     if (wrote) console.log(`"전체 로그" 탭에 ${logRows.length}행 추가`);
@@ -208,10 +228,22 @@ async function main() {
   if (!isInitialRun) {
     for (const post of results) {
       try {
+        post.dday ??= dday(post.extract?.period);
         await notifyDiscord(post);
       } catch (err) {
         console.error(`디스코드 알림 실패 (${post.title}): ${err.message}`);
       }
+    }
+  }
+
+  // 5-1) 요약 다이제스트 — --digest 플래그 또는 매주 월요일(KST) 자동 발송
+  const isMondayKST = new Date(Date.now() + 9 * 3_600_000).getUTCDay() === 1;
+  if (DIGEST || isMondayKST) {
+    try {
+      const sent = await sendDigest(summaryPosts, nowKST().slice(0, 10));
+      if (sent) console.log(`디스코드 다이제스트 발송 (${summaryPosts.length}개 딜러)`);
+    } catch (err) {
+      console.error(`디스코드 다이제스트 실패: ${err.message}`);
     }
   }
 

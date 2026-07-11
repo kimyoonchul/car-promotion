@@ -3,8 +3,11 @@ import { google } from 'googleapis';
 const SUMMARY_TAB = '지금 진행중';
 const LOG_TAB = '전체 로그';
 
-export const SUMMARY_HEADER = ['딜러사', '지역', '캠페인명', '기간', '핵심 혜택', '정비캠페인', '게시일', '링크'];
-export const LOG_HEADER = ['수집일', '딜러사', '분류', '캠페인명', '게시일', '기간', '혜택', '정비캠페인', '링크'];
+export const SUMMARY_HEADER = ['딜러사', '지역', '구분', '캠페인명', '기간', '마감', '할인 혜택', '무료·사은품', '링크'];
+const SUMMARY_WIDTHS = [100, 130, 55, 210, 165, 75, 300, 270, 90];
+
+export const LOG_HEADER = ['수집일', '딜러사', '분류', '캠페인명', '게시일', '기간', '할인', '무료·사은품', '정비', '링크'];
+const LOG_WIDTHS = [140, 100, 120, 220, 90, 165, 280, 240, 45, 90];
 
 let clientPromise = null;
 
@@ -41,17 +44,42 @@ async function ensureTabs(sheets, spreadsheetId) {
   return { summaryId: byTitle.get(SUMMARY_TAB), logId: byTitle.get(LOG_TAB) };
 }
 
-function headerFormatRequest(sheetId, columnCount) {
+// 헤더 강조·틀고정·열너비·줄바꿈 — 매 실행 반복해도 안전한(idempotent) 요청들
+function formatRequests(sheetId, widths) {
   return [
-    { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: 'gridProperties.frozenRowCount' } },
     {
-      repeatCell: {
-        range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: columnCount },
-        cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.92, green: 0.94, blue: 0.98 } } },
-        fields: 'userEnteredFormat(textFormat,backgroundColor)',
+      updateSheetProperties: {
+        properties: { sheetId, gridProperties: { frozenRowCount: 1 } },
+        fields: 'gridProperties.frozenRowCount',
       },
     },
-    { autoResizeDimensions: { dimensions: { sheetId, dimension: 'COLUMNS', startIndex: 0, endIndex: columnCount } } },
+    {
+      repeatCell: {
+        range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: widths.length },
+        cell: {
+          userEnteredFormat: {
+            textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } },
+            backgroundColor: { red: 0.11, green: 0.41, blue: 0.83 }, // BMW 블루
+            verticalAlignment: 'MIDDLE',
+          },
+        },
+        fields: 'userEnteredFormat(textFormat,backgroundColor,verticalAlignment)',
+      },
+    },
+    {
+      repeatCell: {
+        range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: widths.length },
+        cell: { userEnteredFormat: { wrapStrategy: 'WRAP', verticalAlignment: 'TOP' } },
+        fields: 'userEnteredFormat(wrapStrategy,verticalAlignment)',
+      },
+    },
+    ...widths.map((pixelSize, i) => ({
+      updateDimensionProperties: {
+        range: { sheetId, dimension: 'COLUMNS', startIndex: i, endIndex: i + 1 },
+        properties: { pixelSize },
+        fields: 'pixelSize',
+      },
+    })),
   ];
 }
 
@@ -71,7 +99,7 @@ export async function writeSummary(rows) {
   });
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId,
-    requestBody: { requests: headerFormatRequest(summaryId, SUMMARY_HEADER.length) },
+    requestBody: { requests: formatRequests(summaryId, SUMMARY_WIDTHS) },
   });
   return true;
 }
@@ -95,7 +123,7 @@ export async function appendLog(rows) {
   if (isEmpty) {
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
-      requestBody: { requests: headerFormatRequest(logId, LOG_HEADER.length) },
+      requestBody: { requests: formatRequests(logId, LOG_WIDTHS) },
     });
   }
   return true;
