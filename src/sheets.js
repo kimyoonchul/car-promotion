@@ -3,8 +3,8 @@ import { google } from 'googleapis';
 const SUMMARY_TAB = '지금 진행중';
 const LOG_TAB = '전체 로그';
 
-export const SUMMARY_HEADER = ['딜러사', '지역', '구분', '캠페인명', '기간', '마감', '할인 혜택', '무료·사은품', '링크'];
-const SUMMARY_WIDTHS = [100, 130, 55, 210, 165, 75, 300, 270, 90];
+export const SUMMARY_HEADER = ['추천', '딜러사', '지역', '구분', '캠페인명', '기간', '마감', '할인 혜택', '무료·사은품', '링크'];
+const SUMMARY_WIDTHS = [150, 100, 130, 55, 210, 165, 75, 300, 270, 90];
 
 export const LOG_HEADER = ['수집일', '딜러사', '분류', '캠페인명', '게시일', '기간', '할인', '무료·사은품', '정비', '링크'];
 const LOG_WIDTHS = [140, 100, 120, 220, 90, 165, 280, 240, 45, 90];

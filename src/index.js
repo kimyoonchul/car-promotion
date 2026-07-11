@@ -1,7 +1,7 @@
 import { DEALERS } from './dealers.js';
 import { fetchHtml, parseArchive, parseDetail, parsePromotionLinks, parseSitemap } from './scrape.js';
 import { loadState, saveState } from './state.js';
-import { extractFromImages } from './vision.js';
+import { extractFromImages, rateCampaigns, EXTRACT_VERSION } from './vision.js';
 import { writeSummary, appendLog } from './sheets.js';
 import { notifyDiscord, sendDigest } from './discord.js';
 import { fileURLToPath } from 'node:url';
@@ -70,11 +70,11 @@ async function resolveDetail(post) {
 
 // 배너 이미지에서 기간·혜택을 뽑는다. 성공한 결과만 캐싱한다 —
 // 실패(키 미설정 등)를 캐싱하면 나중에 키를 넣어도 예전 캠페인은 영영 재시도되지 않기 때문.
-// 구버전 스키마(discounts/freebies 없음)로 캐싱된 항목은 무효로 보고 다시 추출한다.
+// 스키마·처리방식(EXTRACT_VERSION)이 바뀌면 구버전 캐시는 무효로 보고 다시 추출한다.
 async function resolveExtract(post, state) {
   if (NO_VISION) return null;
   const cached = state.extracts[post.id];
-  if (cached && Array.isArray(cached.discounts) && Array.isArray(cached.freebies)) return cached;
+  if (cached?.v === EXTRACT_VERSION) return cached;
   const extract = await extractFromImages({ dealer: post.dealer, title: post.title, images: post.images ?? [] });
   if (extract) state.extracts[post.id] = extract;
   return extract;
@@ -94,10 +94,15 @@ function dday(period) {
 
 const asBullets = (arr) => (arr?.length ? arr.map((x) => `• ${x}`).join('\n') : '-');
 
+const badgeOf = (post) =>
+  post.rating === '강추' ? '⭐⭐ 강추' : post.rating === '추천' ? '⭐ 추천' : '';
+
 function summaryRow(post) {
   const ex = post.extract;
   const isService = ex ? ex.isServiceCampaign : post.service;
+  const badge = badgeOf(post);
   return [
+    badge ? `${badge}${post.reason ? `\n${post.reason}` : ''}` : '',
     post.dealer,
     post.regions,
     isService ? '정비' : '기타',
@@ -191,10 +196,27 @@ async function main() {
     }
   }
 
+  // 3-1) 추천 등급 — 전체 캠페인을 놓고 무료 혜택·실질 할인 기준으로 강추/추천/보통 판정, 강추가 위로
+  if (!NO_VISION && summaryPosts.length) {
+    const ratings = await rateCampaigns(summaryPosts);
+    for (const r of ratings ?? []) {
+      const p = summaryPosts.find((x) => x.dealer === r.dealer);
+      if (p) {
+        p.rating = r.rating;
+        p.reason = r.reason;
+      }
+    }
+    const rank = { 강추: 0, 추천: 1, 보통: 2 };
+    summaryPosts.sort((a, b) => (rank[a.rating] ?? 3) - (rank[b.rating] ?? 3));
+  }
+
   if (DRY_RUN) {
     console.log('dry-run: 시트/디스코드/상태 저장을 생략합니다.');
     console.log('--- 지금 진행중 요약 미리보기 ---');
-    for (const p of summaryPosts) console.log(`  ${p.dealer}: ${p.title} (게시 ${p.publishedOn ?? '?'})`);
+    for (const p of summaryPosts) {
+      const badge = badgeOf(p);
+      console.log(`  ${badge ? `[${badge}] ` : ''}${p.dealer}: ${p.title} (게시 ${p.publishedOn ?? '?'})${p.reason ? ` — ${p.reason}` : ''}`);
+    }
     return;
   }
 
