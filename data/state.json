@@ -334,6 +334,21 @@
       "firstSeen": "2026-07-12 00:42:45",
       "dealer": "코오롱모터스",
       "title": "나와 내차를 케어하는 특별한 선택, KOLON SMART CARE 2.3"
+    },
+    "https://www.kolonmotors.com/promotions/0b85cd3b-f101-4d95-a2c8-f9628c612ec0": {
+      "firstSeen": "2026-08-03 13:08:29",
+      "dealer": "코오롱모터스",
+      "title": "BMW 8월 프로모션"
+    },
+    "https://www.kolonmotors.com/promotions/0333bd73-dc00-432a-b7f5-148583630091": {
+      "firstSeen": "2026-08-03 13:08:29",
+      "dealer": "코오롱모터스",
+      "title": "BMW 8월 금융 프로모션"
+    },
+    "https://www.kolonmotors.com/promotions/913a47a0-d712-4e01-a080-b4c9063867cf": {
+      "firstSeen": "2026-08-03 13:08:29",
+      "dealer": "코오롱모터스",
+      "title": "BMW 8월 프로모션"
     }
   },
   "extracts": {
@@ -648,6 +663,39 @@
       "discounts": [],
       "freebies": [],
       "summary": "BMW SPRING UP WEEK 2026 캠페인으로 새로운 봄, 함께하는 즐거움을 제안하는 BMW의 시즈널 프로모션",
+      "isServiceCampaign": false
+    },
+    "https://www.kolonmotors.com/promotions/0b85cd3b-f101-4d95-a2c8-f9628c612ec0": {
+      "v": 2,
+      "period": "2026.08.01 ~ 2026.08.31",
+      "discounts": [],
+      "freebies": [
+        "BMW i 소울메이트: 차량 출고일로부터 3년간 멤버십 혜택 제공 (BMW Charging 프로모션 쿠폰, BMW 타이어 할인 쿠폰, BMW 코리아 이벤트 응모 기회)",
+        "BMW i Re:Drive 프로그램(밴티지 코인): BMW 전기차 신차 구매 이력이 있는 신차 구매 전고객 밴티지 코인 제공 - UKL, KKL: 300,000 코인 / MKL, GKL: 500,000 코인 (공식 서류로 증빙 가능한 경우에만 적용, 기존 BMW 전기차 구매 이력의 경우 기간 제한 없음)",
+        "BMW 전기차 프로모션(코오롱 모터스 한정) - BMW i4, iX1, iX2: 50만원 충전 카드 제공",
+        "BMW 전기차 프로모션(코오롱 모터스 한정) - BMW i5, i7, iX: 1년 무제한 충전 카드 (카드 등록 시점(수령 후 3개월 이내)부터 시작, 서비스 지역은 서울, 경기, 인천 지역만 제공)",
+        "BMW Excellence Club 3.0 (럭셔리 클래스 오너 대상): 럭셔리 라이프 스타일 큐레이션 바이 엑셀런스, 핸드오버 세레모니, 전용 렌터카 서비스, 에어포트 서비스, 드라이빙 센터 바우처, BMW Ladies Championship 엑셀런스 팩, 글로벌 BMW 이벤트, 웰컴 서비스 콜, 보증기간 PLUS CHECK 서비스, 픽업 & 딜리버리 서비스, 로너카 서비스, 사고차 케어 서비스",
+        "BMW 밴티지 코인 프로모션: UKL 10만 코인, KKL 15만 코인, MKL 20만 코인, GKL 25만 코인 (BMW Vantage 가입 후 본인 차량을 App에 등록한 고객에 한해 코인 지급, 차량 구입 후 3개월 내 가입 및 등록 완료하지 않은 고객에게는 코인 미지급)",
+        "BMW BEV MEMBERSHIP: 1주일 간 BMW BEV 시승차 1회 제공, BMW 차징 네트워크 충전비 100% 무료, 보험료 무료(본인부담금 최대 100만원), 하이패스 자동결제 통행료 무료 (BMW 신차 구매 시 차량 1대 당 이용원 1개 지급, 사용기한은 인보이스 일자로부터 90일, 만 26세 이상만 이용 가능)",
+        "BMW M 특별 프로모션(Gen M Privilege, M 시리즈 오너 대상) - BMW M 퍼포먼스: M Track Day 2026 초청, Gen M 드라이빙 쿠폰, 밴티지 앱 조이몰 10만원 쿠폰 3매",
+        "BMW M 특별 프로모션(Gen M Privilege, M 시리즈 오너 대상) - BMW M 하이 퍼포먼스: M FEST 2026 초청, Gen M 드라이빙 쿠폰, 밴티지 앱 조이몰 10만원 쿠폰 3매, M 익스클루시브 익스피리언스 추첨 응모 기회, M 웰컴 기프트"
+      ],
+      "summary": "코오롱모터스 BMW 8월 프로모션은 전기차 멤버십(i 소울메이트, i Re:Drive, BEV Membership) 및 밴티지 코인 혜택, 럭셔리 클래스 오너를 위한 Excellence Club 3.0, M 시리즈 오너를 위한 Gen M Privilege 혜택, 그리고 삼성카드 다이렉트 오토 할부(60개월 연 4.1%, 선수금 1.0% 캐시백, 중도상환수수료 0원)를 제공한다.",
+      "isServiceCampaign": false
+    },
+    "https://www.kolonmotors.com/promotions/0333bd73-dc00-432a-b7f5-148583630091": {
+      "v": 2,
+      "period": "2026.08.01 ~ 2026.08.31",
+      "discounts": [
+        "다이렉트 오토 카드 할부(60개월): 금리 연 4.1%",
+        "다이렉트 오토 카드 할부(48개월): 금리 연 4.0%",
+        "다이렉트 오토 카드 할부(36개월): 금리 연 4.0%",
+        "다이렉트 오토 카드 할부(24개월): 금리 연 3.9%",
+        "다이렉트 오토 카드 할부(3/6/12개월): 금리 연 3.8%",
+        "선수금: 1.0% 캐시백"
+      ],
+      "freebies": [],
+      "summary": "코오롱 모터스 X 삼성카드 다이렉트 오토 카드 할부로 60개월 할부 이용 시 금리 연 4.1%, 선수금 1.0% 캐시백에 언제 상환해도 수수료 0원(대상 카드: 삼성개인신용카드, 국민행복/가족카드 제외)",
       "isServiceCampaign": false
     }
   }
