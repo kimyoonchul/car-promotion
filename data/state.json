@@ -349,6 +349,11 @@
       "firstSeen": "2026-08-03 13:08:29",
       "dealer": "코오롱모터스",
       "title": "BMW 8월 프로모션"
+    },
+    "https://www.kolonmotors.com/promotions/903df735-f1a1-477d-8690-9105aedb43dd": {
+      "firstSeen": "2026-08-09 11:36:56",
+      "dealer": "코오롱모터스",
+      "title": "나와 내 차를 케어하는 특별한 선택, KOLON SMART CARE ON."
     }
   },
   "extracts": {
@@ -697,6 +702,19 @@
       "freebies": [],
       "summary": "코오롱 모터스 X 삼성카드 다이렉트 오토 카드 할부로 60개월 할부 이용 시 금리 연 4.1%, 선수금 1.0% 캐시백에 언제 상환해도 수수료 0원(대상 카드: 삼성개인신용카드, 국민행복/가족카드 제외)",
       "isServiceCampaign": false
+    },
+    "https://www.kolonmotors.com/promotions/903df735-f1a1-477d-8690-9105aedb43dd": {
+      "v": 2,
+      "period": "미상",
+      "discounts": [],
+      "freebies": [
+        "Parts Care 프로그램: 상품 개시일로부터 2년/4만km간 차량 부품 관리 서비스 제공 (무상)",
+        "보증 연장 서비스(Extended Warranty): 인도일로부터 5년 또는 30만km(선도래 조건)까지 워런티 연장 혜택, 기본 보증 기간 2년",
+        "재구매 비용 프로그램: 상품 가입 차량 인도일로부터 30개월~48개월 이내 코오롱 모터스에서 BMW 신차 재구매 시 부대비용 일부 지원 - 기존 차량을 코오롱 모터스 외 공식 전시장에서 구매하고 재구매 차량을 코오롱 모터스에서 구매한 경우(BMW to BMW Kolon): 1,000,000원 지원 (코오롱 모터스 공식 AS센터에서 가입 필요) - 기존 차량과 재구매 차량을 모두 코오롱 모터스에서 구매한 경우(BMW Kolon to BMW Kolon): 2,000,000원 지원 (코오롱 모터스 공식 전시장에서 가입 필요)",
+        "공제금액 지원 프로그램: 사고 건당 50만원, 최대 6회(총 300만원) 지원"
+      ],
+      "summary": "코오롱 모터스가 BMW 차량 고객을 위해 Car Care(Parts Care), Driver Care(재구매 비용 지원, 공제금액 지원), Extended Warranty(보증 연장) 프로그램으로 구성된 'KOLON SMART CARE ON' 상품을 제공하며, 보증 연장 프로그램은 유상 구매이고 나머지 프로그램은 무상으로 함께 제공된다.",
+      "isServiceCampaign": true
     }
   }
 }
