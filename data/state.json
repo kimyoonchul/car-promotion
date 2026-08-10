@@ -354,6 +354,11 @@
       "firstSeen": "2026-08-09 11:36:56",
       "dealer": "코오롱모터스",
       "title": "나와 내 차를 케어하는 특별한 선택, KOLON SMART CARE ON."
+    },
+    "https://www.kolonmotors.com/promotions/eded4264-a417-495a-841c-8ab99ecc6ce2": {
+      "firstSeen": "2026-08-10 11:42:38",
+      "dealer": "코오롱모터스",
+      "title": "나와 내 차를 케어하는 특별한 선택, KOLON SMART CARE"
     }
   },
   "extracts": {
@@ -714,6 +719,14 @@
         "공제금액 지원 프로그램: 사고 건당 50만원, 최대 6회(총 300만원) 지원"
       ],
       "summary": "코오롱 모터스가 BMW 차량 고객을 위해 Car Care(Parts Care), Driver Care(재구매 비용 지원, 공제금액 지원), Extended Warranty(보증 연장) 프로그램으로 구성된 'KOLON SMART CARE ON' 상품을 제공하며, 보증 연장 프로그램은 유상 구매이고 나머지 프로그램은 무상으로 함께 제공된다.",
+      "isServiceCampaign": true
+    },
+    "https://www.kolonmotors.com/promotions/eded4264-a417-495a-841c-8ab99ecc6ce2": {
+      "v": 2,
+      "period": "미상",
+      "discounts": [],
+      "freebies": [],
+      "summary": "BMW SMART CARE 2.3 및 BMW SMART CARE PREMIUM 서비스 안내 - CAR CARE, DRIVER CARE, EXTENDED WARRANTY 프로그램",
       "isServiceCampaign": true
     }
   }
