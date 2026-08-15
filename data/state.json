@@ -359,6 +359,11 @@
       "firstSeen": "2026-08-10 11:42:38",
       "dealer": "코오롱모터스",
       "title": "나와 내 차를 케어하는 특별한 선택, KOLON SMART CARE"
+    },
+    "https://www.bmwdongsung.co.kr/promotions/d46528ea-5be0-474a-bc56-734e934fa3b7": {
+      "firstSeen": "2026-08-15 10:57:24",
+      "dealer": "동성모터스",
+      "title": "DR. BMW WEEK 2026"
     }
   },
   "extracts": {
@@ -727,6 +732,20 @@
       "discounts": [],
       "freebies": [],
       "summary": "BMW SMART CARE 2.3 및 BMW SMART CARE PREMIUM 서비스 안내 - CAR CARE, DRIVER CARE, EXTENDED WARRANTY 프로그램",
+      "isServiceCampaign": true
+    },
+    "https://www.bmwdongsung.co.kr/promotions/d46528ea-5be0-474a-bc56-734e934fa3b7": {
+      "v": 2,
+      "period": "2026.08.18 ~ 2026.10.02",
+      "discounts": [
+        "BMW 오리지널 부품 및 공임: 20% 할인 (10년차 이상 차량은 추가 10% 할인)",
+        "BMW 오리지널 타이어: 10% 할인, 공임 최대 50% 할인",
+        "BMW 오리지널 액세서리 & 라이프스타일 제품 및 공임: 20% 할인"
+      ],
+      "freebies": [
+        "보이는 무상점검 BMW 서비스 라이브"
+      ],
+      "summary": "BSI 만료 고객 및 2026년 내 BSI 만료 예정 고객을 대상으로 무상점검과 부품·공임·타이어·액세서리 할인 혜택을 제공하는 동성모터스의 BMW 서비스 캠페인",
       "isServiceCampaign": true
     }
   }
