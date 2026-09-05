@@ -1,0 +1,42 @@
+name: watch-driving-center
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # 10분마다 (GitHub 스케줄은 수 분 지연될 수 있음)
+  workflow_dispatch:
+
+# 같은 워크플로가 겹쳐 돌아 상태 커밋이 충돌하지 않도록
+concurrency:
+  group: watch-driving-center
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: node src/watch-driving-center.js
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Commit state
+        if: always()
+        run: |
+          git config user.name "campaign-bot"
+          git config user.email "campaign-bot@users.noreply.github.com"
+          git add data/driving-center.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update driving center seat state"
+            git pull --rebase origin main
+            git push
+          fi

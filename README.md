@@ -40,6 +40,29 @@ node src/index.js --digest   # 실행 + "지금 진행중" 요약을 디스코�
 
 첫 실행은 백필이라 디스코드 알림 없이 시트에만 쌓인다. 이후 실행부터 신규 캠페인만 알림이 온다. `data/state.json`(수집 이력)은 액션이 자동 커밋한다.
 
+## 드라이빙 센터 예약 자리 알림
+
+BMW 드라이빙 센터 **Owners Track Day**(자가 차량 서킷 주행, 50,000원)는 거의 항상 매진이라, 취소표·추가 오픈을 잡기 위해 10분마다 잔여석을 확인해 같은 디스코드 채널로 알린다.
+
+```
+GitHub Actions (10분마다)
+ └→ /api/public/schedule 로 이번 달~3개월 뒤까지 회차가 있는 날짜 조회
+     └→ 날짜별 /api/public/schedule/YYYYMMDD 로 회차별 잔여석 조회
+         └→ data/driving-center.json 과 비교
+             ├→ 잔여석 0 → 1 이상으로 바뀐 회차 → 디스코드 "자리 났어요" 알림 (@here)
+             └→ 처음 보는 날짜 → "새 일정 오픈" 알림
+```
+
+- 예약 페이지는 BMW ID 로그인 + 가상 대기열 뒤에 있지만, 일정 API는 로그인 없이 응답해서 **아이디·비밀번호·쿠키가 필요 없다** (2026-09 확인)
+- 자리가 계속 있는 회차는 다시 알리지 않고, 다시 매진된 뒤 또 열리면 다시 알린다
+- 감시 프로그램 추가는 `src/drivingCenter.js`의 `PROGRAMS`에 한 줄 (Owners Drift Day 코드가 주석으로 있음)
+
+```sh
+npm run watch-dc -- --dry-run   # 조회·비교만
+npm run watch-dc:status         # 현재 예약 현황을 디스코드로 한 번 발송 (웹훅 확인용)
+npm run watch-dc                # 실제 실행 (변화 있으면 알림 + 상태 저장)
+```
+
 ## 구조
 
 | 파일 | 역할 |

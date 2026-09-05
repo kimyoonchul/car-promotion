@@ -40,7 +40,7 @@ function postEmbed(post, { isNew = false } = {}) {
   };
 }
 
-async function postToWebhook(payload) {
+export async function postToWebhook(payload) {
   const webhook = process.env.DISCORD_WEBHOOK_URL;
   if (!webhook) return false;
   const res = await fetch(webhook, {

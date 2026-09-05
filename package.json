@@ -9,7 +9,9 @@
   },
   "scripts": {
     "collect": "node src/index.js",
-    "dry-run": "node src/index.js --dry-run"
+    "dry-run": "node src/index.js --dry-run",
+    "watch-dc": "node src/watch-driving-center.js",
+    "watch-dc:status": "node src/watch-driving-center.js --status"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
