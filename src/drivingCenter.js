@@ -99,7 +99,8 @@ export function diffSnapshot(prev = {}, next = {}) {
 }
 
 const DAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
-export const fmtDate = (d) => `${d.slice(5).replace('-', '/')}(${DAY_KO[new Date(`${d}T00:00:00+09:00`).getDay()]})`;
+// 요일은 실행 환경의 시간대와 무관하게 날짜 문자열만으로 계산한다 (UTC 러너에서 하루 어긋나던 문제)
+export const fmtDate = (d) => `${d.slice(5).replace('-', '/')}(${DAY_KO[new Date(`${d}T00:00:00Z`).getUTCDay()]})`;
 
 // 디스코드 embed — 자리가 난 회차 알림
 export function openedEmbed(program, opened, snapshot) {

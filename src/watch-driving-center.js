@@ -86,7 +86,8 @@ async function main() {
       }
     }
 
-    if (!DRY_RUN) state.programs[key] = { name: program.name, checkedAt: nowKST(), snapshot };
+    // checkedAt 같은 매번 바뀌는 값은 넣지 않는다 — 상태 파일이 실제 잔여석 변화가 있을 때만 바뀌어야 커밋이 안 쌓인다
+    if (!DRY_RUN) state.programs[key] = { name: program.name, snapshot };
   }
 
   if (!DRY_RUN) saveState(state);
