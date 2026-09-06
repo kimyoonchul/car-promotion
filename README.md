@@ -45,7 +45,7 @@ node src/index.js --digest   # 실행 + "지금 진행중" 요약을 디스코�
 BMW 드라이빙 센터 **Owners Track Day**(자가 차량 서킷 주행, 50,000원)는 거의 항상 매진이라, 취소표·추가 오픈을 잡기 위해 10분마다 잔여석을 확인해 같은 디스코드 채널로 알린다.
 
 ```
-GitHub Actions (10분마다)
+GitHub Actions (6시간마다 잡 시동 → 잡 안에서 5분 간격으로 5시간 45분 반복)
  └→ /api/public/schedule 로 이번 달~3개월 뒤까지 회차가 있는 날짜 조회
      └→ 날짜별 /api/public/schedule/YYYYMMDD 로 회차별 잔여석 조회
          └→ data/driving-center.json 과 비교

@@ -1,11 +1,14 @@
 name: watch-driving-center
 
+# GitHub 의 짧은 주기 cron 은 실제로는 2~4시간씩 밀린다 (2026-09 관측: */10 이 하루 10회 실행).
+# 그래서 6시간마다 잡을 하나 띄우고, 잡 안에서 --loop 로 5분마다 조회한다 (잡 한도 6시간, 공개 레포는 시간 무제한).
+# 시동 cron 이 밀려도 앞 잡이 5시간 45분 동안 돌고 있어 빈 구간이 짧다.
 on:
   schedule:
-    - cron: '*/10 * * * *' # 10분마다 (GitHub 스케줄은 수 분 지연될 수 있음)
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
-# 같은 워크플로가 겹쳐 돌아 상태 커밋이 충돌하지 않도록
+# 앞 잡이 아직 돌고 있으면 새 잡은 기다린다 (겹쳐서 조회·커밋하지 않도록)
 concurrency:
   group: watch-driving-center
   cancel-in-progress: false
@@ -13,6 +16,7 @@ concurrency:
 jobs:
   watch:
     runs-on: ubuntu-latest
+    timeout-minutes: 358
     permissions:
       contents: write
     steps:
@@ -25,15 +29,22 @@ jobs:
 
       - run: npm ci
 
-      - run: node src/watch-driving-center.js
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      - name: Commit state
-        if: always()
+      - name: Git identity (상태 파일을 루프 안에서 바로 커밋하기 위해)
         run: |
           git config user.name "campaign-bot"
           git config user.email "campaign-bot@users.noreply.github.com"
+
+      - run: node src/watch-driving-center.js --loop
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          COMMIT_STATE: '1'
+          LOOP_MINUTES: '345'
+          POLL_MINUTES: '5'
+
+      # 루프 안 커밋이 실패했을 때의 뒷정리
+      - name: Commit state (fallback)
+        if: always()
+        run: |
           git add data/driving-center.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: update driving center seat state"
