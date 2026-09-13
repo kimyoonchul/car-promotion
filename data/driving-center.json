@@ -32,14 +32,14 @@
             "start": "09:00",
             "end": "10:00",
             "total": 10,
-            "remaining": 1
+            "remaining": 0
           },
           {
             "turnSequence": "53726",
             "start": "09:40",
             "end": "10:40",
             "total": 10,
-            "remaining": 1
+            "remaining": 0
           },
           {
             "turnSequence": "53727",
