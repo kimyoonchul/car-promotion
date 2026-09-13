@@ -9,21 +9,21 @@
             "start": "09:00",
             "end": "10:00",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           },
           {
             "turnSequence": "53723",
             "start": "09:40",
             "end": "10:40",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           },
           {
             "turnSequence": "53724",
             "start": "10:20",
             "end": "11:20",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           }
         ],
         "2026-09-30": [
@@ -32,21 +32,21 @@
             "start": "09:00",
             "end": "10:00",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           },
           {
             "turnSequence": "53726",
             "start": "09:40",
             "end": "10:40",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           },
           {
             "turnSequence": "53727",
             "start": "10:20",
             "end": "11:20",
             "total": 10,
-            "remaining": 0
+            "remaining": 1
           }
         ],
         "2026-10-28": [
