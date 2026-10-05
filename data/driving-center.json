@@ -60,14 +60,14 @@
             "start": "13:40",
             "end": "14:40",
             "total": 10,
-            "remaining": 1
+            "remaining": 0
           },
           {
             "turnSequence": "56298",
             "start": "14:20",
             "end": "15:20",
             "total": 10,
-            "remaining": 3
+            "remaining": 0
           }
         ]
       }
