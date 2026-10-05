@@ -25,6 +25,50 @@
             "total": 10,
             "remaining": 0
           }
+        ],
+        "2026-11-10": [
+          {
+            "turnSequence": "56293",
+            "start": "09:00",
+            "end": "10:00",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "56294",
+            "start": "09:40",
+            "end": "10:40",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "56295",
+            "start": "10:20",
+            "end": "11:20",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "56296",
+            "start": "13:00",
+            "end": "14:00",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "56297",
+            "start": "13:40",
+            "end": "14:40",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "56298",
+            "start": "14:20",
+            "end": "15:20",
+            "total": 10,
+            "remaining": 10
+          }
         ]
       }
     }
