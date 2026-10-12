@@ -444,6 +444,11 @@
       "firstSeen": "2026-10-02 15:00:30",
       "dealer": "코오롱모터스",
       "title": "BMW 10월 금융 프로모션"
+    },
+    "https://www.samchullymotors.co.kr/promotions/411edac3-35dd-475b-8182-2641a8de13f4": {
+      "firstSeen": "2026-10-12 15:19:22",
+      "dealer": "삼천리모터스",
+      "title": "M Performance Garage Event 2026."
     }
   },
   "extracts": {
@@ -1042,6 +1047,25 @@
       ],
       "summary": "BMW 코오롱 모터스는 2026년 10월 한 달간 BMW i 소울메이트, BMW i Re:Drive 프로그램, BMW 전기차 프로모션(충전 카드 제공), BMW Excellence Club 3.0, BMW 밴티지 코인 프로모션, BMW BEV MEMBERSHIP, BMW M 특별 프로모션 등 다양한 전기차·럭셔리·M 시리즈 오너 혜택과 함께, 삼성카드와 제휴한 다이렉트 오토 카드 할부 프로그램(60개월 기준 연 4.6% 금리, 선수금 1.0% 캐시백, 중도상환수수료 0원)을 제공한다.",
       "isServiceCampaign": false
+    },
+    "https://www.samchullymotors.co.kr/promotions/411edac3-35dd-475b-8182-2641a8de13f4": {
+      "v": 2,
+      "period": "2026.10.12 ~ 2026.11.28",
+      "discounts": [
+        "M 퍼포먼스 배기, M 퍼포먼스 브레이크, 카본스포일러: 30% 할인",
+        "M 퍼포먼스 파츠(카본 파츠 포함), 휠, 고무매트: 25% 할인",
+        "그 외 카액세서리 / 방향제 / BMW 라이프스타일: 20% 할인",
+        "M 퍼포먼스 배기 작업 시 부품 및 공임: 30% 할인"
+      ],
+      "freebies": [
+        "M 퍼포먼스 배기 작업 시 디퍼런셜 오일(뒤) 무상 제공",
+        "스타일업 쿠폰 사용 고객 대상 스타일업 쿠폰 1회 재발행 (27년 1월 발급 예정)",
+        "150만원 이상 작업 시 BMW 향수(AMBERNESS EDP) 50ML 증정",
+        "300만원 이상 작업 시 BMW 미니어쳐 카(3.0 CSL) 증정",
+        "500만원 이상 작업 시 BMW 캐리어(M TROLLEY) 증정"
+      ],
+      "summary": "삼천리 모터스 군포 M Performance Garage 방문 고객을 대상으로 오리지널 카 액세서리·휠·라이프스타일 최대 30% 할인, M 퍼포먼스 배기 작업 시 부품 및 공임 30% 할인과 디퍼런셜 오일 무상 제공, 작업 금액별 사은품 증정 등의 혜택을 제공하는 이벤트.",
+      "isServiceCampaign": true
     }
   }
 }
