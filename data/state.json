@@ -469,6 +469,11 @@
       "firstSeen": "2026-11-03 16:07:11",
       "dealer": "코오롱모터스",
       "title": "BMW 11월 프로모션"
+    },
+    "https://www.bmwdongsung.co.kr/promotions/796e3ce5-a800-4c76-8242-499e5b822696": {
+      "firstSeen": "2026-11-04 15:51:45",
+      "dealer": "동성모터스",
+      "title": "BMW 서비스 패키지 프로모션 2026."
     }
   },
   "extracts": {
@@ -1123,6 +1128,14 @@
       ],
       "summary": "코오롱 모터스 X 삼성카드 다이렉트 오토 카드 할부로 60개월 할부 이용 시 금리 연 4.6%, 선수금 1.0% 캐시백, 언제 상환해도 수수료 0원 혜택 제공(대상: 삼성개인신용카드, 국민행복/가족카드 제외)",
       "isServiceCampaign": false
+    },
+    "https://www.bmwdongsung.co.kr/promotions/796e3ce5-a800-4c76-8242-499e5b822696": {
+      "v": 2,
+      "period": "2026.11.02 ~ 2026.12.12",
+      "discounts": [],
+      "freebies": [],
+      "summary": "BMW 서비스 패키지(워런티 플러스 프리미엄/라이트, 워런티 플러스 스탠다드, 서비스케어 플러스) 가입 대상 차량에 대한 프로모션으로, 대상 차량 조건에 따라 가입 가능한 패키지가 구분됨. M 하이 퍼포먼스 모델 및 순수 전기 모델은 가입 불가.",
+      "isServiceCampaign": true
     }
   }
 }
