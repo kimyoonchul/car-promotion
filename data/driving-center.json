@@ -46,6 +46,29 @@
             "total": 10,
             "remaining": 0
           }
+        ],
+        "2026-12-23": [
+          {
+            "turnSequence": "57246",
+            "start": "09:00",
+            "end": "10:00",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "57247",
+            "start": "09:40",
+            "end": "10:40",
+            "total": 10,
+            "remaining": 10
+          },
+          {
+            "turnSequence": "57248",
+            "start": "10:20",
+            "end": "11:20",
+            "total": 10,
+            "remaining": 10
+          }
         ]
       }
     }
