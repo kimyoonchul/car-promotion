@@ -5,13 +5,6 @@
       "snapshot": {
         "2026-11-10": [
           {
-            "turnSequence": "56296",
-            "start": "13:00",
-            "end": "14:00",
-            "total": 10,
-            "remaining": 0
-          },
-          {
             "turnSequence": "56297",
             "start": "13:40",
             "end": "14:40",
