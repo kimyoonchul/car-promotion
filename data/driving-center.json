@@ -3,6 +3,29 @@
     "1023": {
       "name": "Owners Track Day",
       "snapshot": {
+        "2026-12-09": [
+          {
+            "turnSequence": "58264",
+            "start": "09:00",
+            "end": "10:00",
+            "total": 10,
+            "remaining": 0
+          },
+          {
+            "turnSequence": "58265",
+            "start": "09:40",
+            "end": "10:40",
+            "total": 10,
+            "remaining": 0
+          },
+          {
+            "turnSequence": "58266",
+            "start": "10:20",
+            "end": "11:20",
+            "total": 10,
+            "remaining": 0
+          }
+        ],
         "2026-12-23": [
           {
             "turnSequence": "57246",
